@@ -16,7 +16,7 @@ let hasMagnet = false;
 let speedMultiplier = 1;
 let bonusShown = false;
 
-const isMobile = window.innerWidth <= 768;
+
 
 // --- Animation plane ---
 function updatePlanePosition() {
@@ -32,28 +32,16 @@ function animatePlane() {
 }
 animatePlane();
 
-// --- Mobile : suivi du doigt ---
-// Contrôles mobiles uniquement avec boutons
+// Gestion des boutons tactiles
 document.getElementById("btn-up").addEventListener("touchstart", () => {
-  targetY = Math.max(0, targetY - 30);
+  targetY = Math.max(0, targetY - 50);
 });
-
 document.getElementById("btn-down").addEventListener("touchstart", () => {
-  targetY = Math.min(window.innerHeight - 40, targetY + 30);
+  targetY = Math.min(window.innerHeight - 40, targetY + 50);
 });
-
 document.getElementById("btn-right").addEventListener("touchstart", () => {
-  targetX = Math.min(window.innerWidth - 60, targetX + 30);
+  targetX = Math.min(window.innerWidth - 60, targetX + 50);
 });
-
-
-// --- Ajout dans la boucle d'animation ---
-function animatePlane() {
-  planeX += (targetX - planeX) * 0.1;
-  planeY += (targetY - planeY) * 0.1;
-  updatePlanePosition();
-  requestAnimationFrame(animatePlane);
-}
 
 
 

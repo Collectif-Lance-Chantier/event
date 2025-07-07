@@ -5,26 +5,21 @@
   <title>Avion vs Nuages</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<div id="mobile-controls" style="display: none;">
+  <button id="btn-up">⬆️</button>
+  <button id="btn-down">⬇️</button>
+  <button id="btn-right">➡️</button>
+</div>
 <body>
   <div id="hud">
     Distance : <span id="distance">0</span> m | Pièces : <span id="coins">0</span>
   </div>
+
   <div id="game">
     <div id="plane"></div>
   </div>
-  <script src="script.js"></script>
-  
-  <!-- Contrôles tactiles (mobiles uniquement) -->
-<div id="mobile-controls">
-  <button id="up">⬆</button>
-  <div>
-    <button id="left">⬅</button>
-    <button id="down">⬇</button>
-    <button id="right">➡</button>
-  </div>
-</div>
 
-  
+  <script src="script.js"></script>
 </body>
 </html>
 

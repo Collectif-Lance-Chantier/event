@@ -5,6 +5,9 @@ const coinsDisplay = document.getElementById("coins");
 
 let planeX = 50;
 let planeY = window.innerHeight / 2;
+let targetX = planeX;
+let targetY = planeY;
+
 let distance = 0;
 let coins = 0;
 
@@ -13,20 +16,68 @@ let hasMagnet = false;
 let speedMultiplier = 1;
 let bonusShown = false;
 
+const isMobile = window.innerWidth <= 768;
+
+// --- Animation plane ---
 function updatePlanePosition() {
-  plane.style.top = planeY + "px";
   plane.style.left = planeX + "px";
+  plane.style.top = planeY + "px";
 }
 
-document.addEventListener("keydown", (e) => {
-  const speed = 10;
-  if (e.key === "ArrowUp" && planeY > 0) planeY -= speed;
-  if (e.key === "ArrowDown" && planeY < window.innerHeight - 40) planeY += speed;
-  if (e.key === "ArrowLeft" && planeX > 0) planeX -= speed;
-  if (e.key === "ArrowRight" && planeX < window.innerWidth - 60) planeX += speed;
+function animatePlane() {
+  planeX += (targetX - planeX) * 0.1;
+  planeY += (targetY - planeY) * 0.1;
   updatePlanePosition();
-});
+  requestAnimationFrame(animatePlane);
+}
+animatePlane();
 
+// --- Mobile : suivi du doigt ---
+if (isMobile) {
+  // Affiche les boutons
+  document.getElementById("mobile-controls").style.display = "flex";
+
+  // Gestion des boutons
+  document.getElementById("btn-up").addEventListener("touchstart", () => {
+    targetY = Math.max(0, targetY - 30);
+  });
+
+  document.getElementById("btn-down").addEventListener("touchstart", () => {
+    targetY = Math.min(window.innerHeight - 40, targetY + 30);
+  });
+
+  document.getElementById("btn-right").addEventListener("touchstart", () => {
+    targetX = Math.min(window.innerWidth - 60, targetX + 30);
+  });
+
+
+
+// --- Ajout dans la boucle d'animation ---
+function animatePlane() {
+  // Appliquer les touches clavier seulement sur PC
+  if (!isMobile) {
+    const step = 4;
+    if (keysPressed.ArrowUp) {
+      targetY = Math.max(0, targetY - step);
+    }
+    if (keysPressed.ArrowDown) {
+      targetY = Math.min(window.innerHeight - 40, targetY + step);
+    }
+    if (keysPressed.ArrowRight) {
+      targetX = Math.min(window.innerWidth - 60, targetX + step);
+    }
+    // Pas de gauche autorisé
+  }
+
+  planeX += (targetX - planeX) * 0.1;
+  planeY += (targetY - planeY) * 0.1;
+  updatePlanePosition();
+  requestAnimationFrame(animatePlane);
+}
+
+}
+
+// --- Nuages ---
 function createCloud() {
   const cloud = document.createElement("div");
   cloud.classList.add("cloud");
@@ -49,8 +100,6 @@ function createCloud() {
       planeRect.bottom > cloudRect.top
     ) {
       alert("💥 Collision avec un nuage !\nDistance parcourue : " + distance + " m");
-
-
       location.reload();
     }
 
@@ -61,6 +110,49 @@ function createCloud() {
   }, 16);
 }
 
+// --- Pièces ---
+function createCoin() {
+  const coin = document.createElement("div");
+  coin.classList.add("coin");
+  coin.style.top = Math.random() * (window.innerHeight - 30) + "px";
+  coin.style.left = window.innerWidth + "px";
+  game.appendChild(coin);
+
+  let coinX = window.innerWidth;
+  const move = setInterval(() => {
+    coinX -= 4;
+    coin.style.left = coinX + "px";
+
+    const planeRect = plane.getBoundingClientRect();
+    const coinRect = coin.getBoundingClientRect();
+
+    if (
+      planeRect.left < coinRect.right &&
+      planeRect.right > coinRect.left &&
+      planeRect.top < coinRect.bottom &&
+      planeRect.bottom > coinRect.top
+    ) {
+      coin.remove();
+      clearInterval(move);
+      coins++;
+      coinsDisplay.textContent = coins;
+    }
+
+    if (hasMagnet) {
+      const planeCenterY = planeRect.top + planeRect.height / 2;
+      const coinCenterY = coinRect.top + coinRect.height / 2;
+      const deltaY = planeCenterY - coinCenterY;
+      coin.style.top = parseFloat(coin.style.top) + deltaY * 0.05 + "px";
+    }
+
+    if (coinX < -50) {
+      coin.remove();
+      clearInterval(move);
+    }
+  }, 16);
+}
+
+// --- Bonus ---
 function createBonus(type) {
   const bonus = document.createElement("div");
   bonus.classList.add("bonus", type);
@@ -99,7 +191,6 @@ function activateStarBonus() {
   isInvincible = true;
   speedMultiplier = 2;
   plane.classList.add("invincible");
-
   setTimeout(() => {
     isInvincible = false;
     speedMultiplier = 1;
@@ -110,64 +201,16 @@ function activateStarBonus() {
 function activateMagnetBonus() {
   hasMagnet = true;
   plane.classList.add("magnet");
-
   setTimeout(() => {
     hasMagnet = false;
     plane.classList.remove("magnet");
   }, 5000);
 }
 
-function createCoin() {
-  const coin = document.createElement("div");
-  coin.classList.add("coin");
-  coin.style.top = Math.random() * (window.innerHeight - 30) + "px";
-  coin.style.left = window.innerWidth + "px";
-  game.appendChild(coin);
-
-  let coinX = window.innerWidth;
-  const move = setInterval(() => {
-    coinX -= 4;
-    coin.style.left = coinX + "px";
-
-    const planeRect = plane.getBoundingClientRect();
-    const coinRect = coin.getBoundingClientRect();
-
-    if (
-      planeRect.left < coinRect.right &&
-      planeRect.right > coinRect.left &&
-      planeRect.top < coinRect.bottom &&
-      planeRect.bottom > coinRect.top
-    ) {
-      coin.remove();
-      clearInterval(move);
-      coins++;
-      coinsDisplay.textContent = coins;
-    }
-
-    // Aimant : attirer pièce vers l'avion
-    if (hasMagnet) {
-      const planeCenterY = planeRect.top + planeRect.height / 2;
-      const coinCenterY = coinRect.top + coinRect.height / 2;
-      const deltaY = planeCenterY - coinCenterY;
-      coin.style.top = parseFloat(coin.style.top) + deltaY * 0.05 + "px";
-    }
-
-    if (coinX < -50) {
-      coin.remove();
-      clearInterval(move);
-    }
-  }, 16);
-}
-
-// -------------------------------
-// GAME LOOP SETUP
-// -------------------------------
-
-setInterval(createCloud, 1500);          // Nuages
-setInterval(createCoin, 1000);           // Pièces
-setInterval(() => createBonus("magnet"), 15000); // Aimant toutes les 15s
-
-// Distance et bonus étoile
+// --- Boucles de jeu ---
+setInterval(createCloud, 1500);
+setInterval(createCoin, 1000);
+setInterval(() => createBonus("magnet"), 15000);
 setInterval(() => {
   distance += 10 * speedMultiplier;
   distanceDisplay.textContent = distance;
@@ -178,25 +221,4 @@ setInterval(() => {
   }
 }, 200);
 
-updatePlanePosition();
-
-// Détection mobile
-const isMobile = window.innerWidth <= 768;
-
-// Contrôles tactiles
-if (isMobile) {
-  document.getElementById("up").addEventListener("touchstart", () => movePlane("up"));
-  document.getElementById("down").addEventListener("touchstart", () => movePlane("down"));
-  document.getElementById("left").addEventListener("touchstart", () => movePlane("left"));
-  document.getElementById("right").addEventListener("touchstart", () => movePlane("right"));
-}
-
-function movePlane(direction) {
-  const speed = 10;
-  if (direction === "up" && planeY > 0) planeY -= speed;
-  if (direction === "down" && planeY < window.innerHeight - 40) planeY += speed;
-  if (direction === "left" && planeX > 0) planeX -= speed;
-  if (direction === "right" && planeX < window.innerWidth - 60) planeX += speed;
-  updatePlanePosition();
-}
 

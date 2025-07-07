@@ -16,6 +16,28 @@ let hasMagnet = false;
 let speedMultiplier = 1;
 let bonusShown = false;
 
+// Demander le plein écran dès que la page est touchée
+document.addEventListener("touchstart", () => {
+  const docElm = document.documentElement;
+  if (docElm.requestFullscreen) docElm.requestFullscreen();
+  else if (docElm.webkitRequestFullscreen) docElm.webkitRequestFullscreen();
+  else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+}, { once: true }); // une seule fois suffit
+
+// Empêcher le zoom double-tap
+let lastTouchEnd = 0;
+document.addEventListener("touchend", function (e) {
+  const now = new Date().getTime();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
+// Empêcher le zoom pinch
+document.addEventListener("gesturestart", function (e) {
+  e.preventDefault();
+});
 
 
 // --- Animation plane ---

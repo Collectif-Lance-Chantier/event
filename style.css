@@ -94,6 +94,7 @@ body {
 }
 
 
+
 /* Afficher uniquement sur petits écrans */
 @media (max-width: 768px) {
   #mobile-controls {

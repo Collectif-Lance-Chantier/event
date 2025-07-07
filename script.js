@@ -33,49 +33,30 @@ function animatePlane() {
 animatePlane();
 
 // --- Mobile : suivi du doigt ---
-if (isMobile) {
-  // Affiche les boutons
-  document.getElementById("mobile-controls").style.display = "flex";
+// Contrôles mobiles uniquement avec boutons
+document.getElementById("btn-up").addEventListener("touchstart", () => {
+  targetY = Math.max(0, targetY - 30);
+});
 
-  // Gestion des boutons
-  document.getElementById("btn-up").addEventListener("touchstart", () => {
-    targetY = Math.max(0, targetY - 30);
-  });
+document.getElementById("btn-down").addEventListener("touchstart", () => {
+  targetY = Math.min(window.innerHeight - 40, targetY + 30);
+});
 
-  document.getElementById("btn-down").addEventListener("touchstart", () => {
-    targetY = Math.min(window.innerHeight - 40, targetY + 30);
-  });
-
-  document.getElementById("btn-right").addEventListener("touchstart", () => {
-    targetX = Math.min(window.innerWidth - 60, targetX + 30);
-  });
-
+document.getElementById("btn-right").addEventListener("touchstart", () => {
+  targetX = Math.min(window.innerWidth - 60, targetX + 30);
+});
 
 
 // --- Ajout dans la boucle d'animation ---
 function animatePlane() {
-  // Appliquer les touches clavier seulement sur PC
-  if (!isMobile) {
-    const step = 4;
-    if (keysPressed.ArrowUp) {
-      targetY = Math.max(0, targetY - step);
-    }
-    if (keysPressed.ArrowDown) {
-      targetY = Math.min(window.innerHeight - 40, targetY + step);
-    }
-    if (keysPressed.ArrowRight) {
-      targetX = Math.min(window.innerWidth - 60, targetX + step);
-    }
-    // Pas de gauche autorisé
-  }
-
   planeX += (targetX - planeX) * 0.1;
   planeY += (targetY - planeY) * 0.1;
   updatePlanePosition();
   requestAnimationFrame(animatePlane);
 }
 
-}
+
+
 
 // --- Nuages ---
 function createCloud() {
